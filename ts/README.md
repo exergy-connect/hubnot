@@ -171,3 +171,42 @@ Proposals, reviews, CI, governance facts, identity relationships, memory, audits
 and custom artifacts are shown as disabled CLI-only entries. They require
 additional relationship-aware operations or separate protocol support and are
 not authored by this PoC.
+
+## Emulated hn console
+
+The console below the tabs uses the repository and token controls above, plus
+its own author-name field. It provides these commands for each selectable type:
+
+```sh
+hn help
+hn version
+hn issue list
+hn issue list --json
+hn issue show sha256:FULL_EVENT_ID
+hn issue open --body "Description" "An issue title"
+hn project open --input '{"schema":"hn.project/1","title":"Roadmap","body":"Planning","archived":false}'
+hn project list
+hn retry
+```
+
+`list`, `show`, and `open` work for issue, project, project-item, discussion,
+discussion-reply and workflow. `show` accepts a full ID or a unique prefix of at
+least eight hex characters. Resource `open --input` takes inline JSON with the
+native state schema; it supports the same minimal shapes as the forms. Unsupported
+fields/values are rejected, including enabling workflows or archiving new projects.
+It does not read local files. This is an explicit command subset, not a full Go
+CLI port: revision, governance, execution, synchronization, other protocols and
+other commands report an unsupported-command error. The version is the browser
+PoC version. JSON output is a browser catalog, not the CLI's versioned envelope.
+
+The argument parser supports single/double quotes and backslash escapes. It never
+executes a shell, expands variables or runs pipes. Arrow Up/Down recall the last
+100 commands in memory; Clear clears output. Nothing in the console is persisted.
+Selected tokens are not echoed, and there is no token command flag.
+
+Creation signs locally and publishes real Git objects. An uncertain write retains
+the signed event and known commit in memory; `hn retry` reuses them and requires
+the original repository to remain selected. Further creation is blocked until
+that retry succeeds. Keep the page open and save the displayed event/ref/commit
+receipt for recovery. Form and console writes are serialized. The console's
+object type comes from the command, independently of the dropdown selection.

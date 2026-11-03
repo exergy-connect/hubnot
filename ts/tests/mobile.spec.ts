@@ -186,3 +186,54 @@ test('object selector scopes tabs, preserves drafts and publishes each resource 
     if (type === 'workflow') expect(JSON.parse(published.body).enabled).toBe(false);
   }
 });
+
+test('CLI console runs hn commands against selected repo with mobile history and signed creation', async ({ page }) => {
+  const writes: any[] = [];
+  const repos: string[] = [];
+  await page.route('https://api.github.com/**', async route => {
+    const request = route.request();
+    const path = new URL(request.url()).pathname;
+    repos.push(path);
+    let data: unknown = { full_name: 'other/project', permissions: { push: true } };
+    if (path.endsWith('/branches')) data = [{ name: 'main' }];
+    if (path.includes('/git/matching-refs/')) data = [];
+    if (request.method() === 'POST') { writes.push({ path, body: request.postDataJSON(), token: request.headers().authorization }); data = { sha: 'f'.repeat(40) }; }
+    await route.fulfill({ json: data });
+  });
+  await page.goto('/');
+  const command = page.locator('#cli-input');
+  const output = page.locator('#cli-output');
+  await command.fill('hn help');
+  await page.locator('#cli-run').tap();
+  await expect(output).toContainText('Hubnot browser CLI');
+  await expect(page.locator('#cli-run')).toBeEnabled();
+  await page.locator('#repo').fill('other/project');
+  await command.fill('hn issue list');
+  await page.locator('#cli-run').tap();
+  await expect(output).toContainText('No issues found.');
+  expect(repos.at(-1)).toContain('/repos/other/project/');
+  await expect(page.locator('#cli-run')).toBeEnabled();
+  await command.press('ArrowUp');
+  await expect(command).toHaveValue('hn issue list');
+  await command.press('ArrowDown');
+  await expect(command).toHaveValue('');
+  await page.locator('#token').fill('console-test-token');
+  await page.locator('#cli-author').fill('Console author');
+  await command.fill('hn issue open --body "From mobile console" "Console title"');
+  await page.locator('#cli-run').tap();
+  await expect(output).toContainText('Published sha256:');
+  expect(writes).toHaveLength(3);
+  expect(writes.every(write => write.path.includes('/repos/other/project/'))).toBe(true);
+  expect(writes[0].token).toBe('Bearer console-test-token');
+  const event = JSON.parse(writes[0].body.tree[0].content);
+  expect(event.kind).toBe('issue.open');
+  expect(event.title).toBe('Console title');
+  expect(event.actorName).toBe('Console author');
+  await expect(output).not.toContainText('console-test-token');
+  await expect(page.locator('#cli-run')).toBeEnabled();
+  await command.fill('git status');
+  await page.locator('#cli-run').tap();
+  await expect(output).toContainText('Commands must start with hn');
+  await page.locator('#cli-clear').tap();
+  await expect(output).toBeEmpty();
+});

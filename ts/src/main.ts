@@ -1,4 +1,5 @@
 import './style.css';
+import { BrowserCLI } from './cli';
 import { parseRepo, signObject, type SignedIssue } from './protocol';
 import { openingFields, objectTypes, type ObjectType, type ObjectInput } from './objects';
 import { GitHub } from './github';
@@ -38,12 +39,21 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     <p class="hint">This minimal PoC creates a fresh, temporary Ed25519 actor per object. The key is discarded after signing; identity reuse and issue editing are outside this demo.</p>
     </fieldset><button id="submit" type="submit">Sign & publish issue <span aria-hidden="true">↗</span></button>
   </form><p id="status" role="status" aria-live="polite"></p><div id="result" hidden><label for="receipt">Publication receipt</label><textarea id="receipt" readonly rows="7"></textarea><button id="retry" class="secondary" type="button" hidden>Retry this exact publication</button><button id="another" class="secondary" type="button" hidden>Write another issue</button></div></div></section>
+  <section class="console" aria-label="Hubnot CLI console">
+    <details open><summary>Hubnot CLI console</summary>
+    <p class="hint">Uses the selected repository and token. Browser emulation of supported hn commands; type hn help for the command list. Output and history stay in memory.</p>
+    <label for="cli-author">Console author name (for signed creations)</label><input id="cli-author" value="Browser user" maxlength="200">
+    <pre id="cli-output" role="log" aria-live="polite" aria-label="Console output">Type hn help to get started.</pre>
+    <form id="cli-form"><label for="cli-input">Command</label><div class="row"><input id="cli-input" placeholder='hn issue list' autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" required><button id="cli-run" type="submit">Run</button><button id="cli-clear" type="button" class="secondary">Clear</button></div></form>
+    </details>
+  </section>
   <footer>hn/0 protocol <span>Browser → Ed25519 → GitHub Git objects → refs/hn/actors/*</span></footer></main>`;
 const element = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const value = (id: string) => element<HTMLInputElement>(id).value;
 const status = element<HTMLParagraphElement>('status');
 let pending: { client: GitHub; issue: SignedIssue; commit?: string } | undefined;
 let busy = false;
+let formPreparing = false;
 const tokenInput = element<HTMLInputElement>('token');
 const rememberToken = element<HTMLInputElement>('remember-token');
 let tokenRepo: string | undefined;
@@ -126,7 +136,9 @@ async function publish() {
 }
 element<HTMLFormElement>('new-issue-form').onsubmit = async event => {
   event.preventDefault();
-  if (busy || pending) return;
+  if (busy || pending || cliRunning || formPreparing) return;
+  if (cli.hasPending) { status.textContent = 'Run hn retry in the console to resolve its pending publication first.'; return; }
+  formPreparing = true;
   lock(true);
   try {
     status.textContent = 'Checking access and signing locally…';
@@ -144,6 +156,7 @@ element<HTMLFormElement>('new-issue-form').onsubmit = async event => {
     pending = { client, issue: await signObject(currentType, value('name'), draft) };
     await publish();
   } catch (error) { status.textContent = String(error); lock(false); }
+  finally { formPreparing = false; }
 };
 element('retry').onclick = publish;
 element('another').onclick = () => {
@@ -252,4 +265,54 @@ element('object-type').onchange = () => {
   element('result').hidden = true;
   clearIssues();
   if (!element('existing-panel').hidden) void loadIssues();
+};
+
+const cli = new BrowserCLI();
+let cliRunning = false;
+const cliHistory: string[] = [];
+let cliHistoryIndex = 0;
+let cliDraft = '';
+const cliInput = element<HTMLInputElement>('cli-input');
+const cliOutput = element<HTMLPreElement>('cli-output');
+function appendConsole(text: string) {
+  cliOutput.textContent = `${cliOutput.textContent}\n${text}`.slice(-100000);
+  cliOutput.scrollTop = cliOutput.scrollHeight;
+}
+element<HTMLFormElement>('cli-form').onsubmit = async event => {
+  event.preventDefault();
+  if (cliRunning) return;
+  if (busy || pending || formPreparing) { appendConsole('Error: Finish or retry the form publication before using the console.'); return; }
+  const line = cliInput.value.trim();
+  if (!line) return;
+  cliHistory.push(line);
+  if (cliHistory.length > 100) cliHistory.shift();
+  cliHistoryIndex = cliHistory.length;
+  cliDraft = '';
+  cliInput.value = '';
+  let repo: string;
+  try { repo = parseRepo(value('repo')); } catch (error) { appendConsole(String(error)); return; }
+  appendConsole(`\n${repo} $ ${line}`);
+  const wasLocked = element<HTMLFieldSetElement>('fields').disabled;
+  cliRunning = true;
+  lock(true);
+  element<HTMLButtonElement>('cli-run').disabled = true;
+  try {
+    const output = await cli.run(line, { repo, token: value('token').trim(), author: value('cli-author') });
+    appendConsole(output);
+    if (output.startsWith('Published ')) clearIssues();
+  } catch (error) { appendConsole(`Error: ${String(error)}`); }
+  finally {
+    cliRunning = false;
+    lock(wasLocked);
+    element<HTMLButtonElement>('cli-run').disabled = false;
+    cliInput.focus();
+  }
+};
+element('cli-clear').onclick = () => { cliOutput.textContent = ''; };
+cliInput.onkeydown = event => {
+  if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+  event.preventDefault();
+  if (cliHistoryIndex === cliHistory.length) cliDraft = cliInput.value;
+  cliHistoryIndex = Math.max(0, Math.min(cliHistory.length, cliHistoryIndex + (event.key === 'ArrowUp' ? -1 : 1)));
+  cliInput.value = cliHistoryIndex === cliHistory.length ? cliDraft : cliHistory[cliHistoryIndex];
 };
