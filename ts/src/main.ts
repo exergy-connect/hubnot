@@ -5,15 +5,14 @@ import { openingFields, objectTypes, type ObjectType, type ObjectInput } from '.
 import { GitHub } from './github';
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <section class="repo-toolbar" aria-label="Repository connection"><form id="issue-form">
+  <header class="repo-toolbar" aria-label="Repository connection"><a href="./" class="brand">h<span>n</span> / hubnot</a><form id="issue-form">
     <fieldset id="fields"><legend class="visually-hidden">Repository connection</legend>
     <div class="repo-control"><label for="repo">GitHub repository</label><div class="row"><input id="repo" name="repo" value="exergy-connect/hubnot" required spellcheck="false" autocapitalize="none" autocorrect="off"><button id="inspect" type="button" class="secondary">Check repo</button></div></div>
-    <div class="token-control"><label for="token">GitHub access token</label><input id="token" name="token" type="password" autocomplete="off" spellcheck="false" autocapitalize="none" autocorrect="off" placeholder="Optional · only needed for GitHub access"></div>
-    <label class="remember"><input id="remember-token" type="checkbox"> Remember token for this repository on this browser</label>
-    <p class="hint" id="storage-status" role="status">Optional: saved tokens are stored unencrypted on this browser and accessible to scripts on this site. Uncheck to remove the saved token.</p>
+    <div class="token-control"><label for="token">GitHub access token</label><input id="token" name="token" type="password" autocomplete="off" spellcheck="false" autocapitalize="none" autocorrect="off" placeholder="Optional token"><label class="remember" title="Save this token for this repository in this browser. Stored unencrypted and accessible to scripts on this site. Uncheck to remove it."><input id="remember-token" type="checkbox" aria-label="Keep token for this repository" aria-describedby="keep-help"> keep</label></div>
+    <span id="keep-help" class="visually-hidden">Save this token for this repository in this browser. Stored unencrypted and accessible to scripts on this site. Uncheck to remove it.</span>
+    <p class="hint" id="storage-status" role="status"></p>
     <p id="repo-status" role="status"></p>
-    </fieldset></form></section>
-  <header><a href="./" class="brand">h<span>n</span> / hubnot</a><span class="badge">BROWSER LAB · 01</span></header>
+    </fieldset></form></header>
   <main><div class="intro"><h1>PERMISSIONLESS COLLABORATION.</h1><p class="promise">No installation. No accounts. No gatekeepers.</p><p class="ownership">Your objects. Your signature. Your repository.</p><p class="intro-description">Explore native Hubnot objects or create and cryptographically sign your own — entirely in your browser.</p></div>
   <section class="workspace" aria-label="Hubnot issues"><aside class="object-picker">
     <label for="object-type">Hubnot object type</label>

@@ -41,7 +41,7 @@ so the build also works under a subdirectory.
 4. Choose **Sign & publish** for the selected type. Save the displayed receipt.
 
 The token goes only to `https://api.github.com`. By default it stays in page
-memory. **Remember token for this repository on this browser** opts into
+memory. **keep** beside the token field opts into
 `localStorage`, keyed by the normalized `owner/repo` (GitHub URL and case variants
 share the same entry). Selecting a different repository clears the current token
 and restores only that repository's saved token. Unchecking removes that entry;
@@ -211,8 +211,8 @@ that retry succeeds. Keep the page open and save the displayed event/ref/commit
 receipt for recovery. Form and console writes are serialized. The console's
 object type comes from the command, independently of the dropdown selection.
 
-The workspace fits the browser viewport. The repository, Check repo button and access token occupy a full-width top
-row on desktop. Mobile wraps these controls; the object workspace sits below. Long results and short viewports
+The workspace fits the browser viewport. The hn / hubnot brand, repository, Check repo button and access token share
+one full-width top row on desktop. Mobile wraps these controls; the object workspace sits below. Long results and short viewports
 scroll inside their panels rather than scrolling the whole page. The expanded
 CLI overlays the workspace and closes by clicking its heading again.
 
@@ -241,3 +241,6 @@ Parent dependencies for downloaded child objects are not remotely checked.
 **Sign & publish** remains an optional direct GitHub transport and requires a
 GitHub token with repository write access. Account-free signing does not confer
 permission to write someone else's remote or bypass project admission policy.
+
+The brief **keep** checkbox sits beside the token field (sized for 50 characters on wide screens, with remaining space prioritized for the repository). Hover over it
+for storage details; the same explanation is available to screen readers.

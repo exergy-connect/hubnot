@@ -253,7 +253,15 @@ test('workspace fits the viewport and console opens only on click', async ({ pag
       expect(Math.abs(repo.y - check.y)).toBeLessThan(4);
       expect(repo.x).toBeLessThan(check.x);
       expect(check.x).toBeLessThan(token.x);
-      expect(token.y).toBeLessThan((await page.locator('header').boundingBox())!.y);
+      const brand = (await page.locator('.brand').boundingBox())!;
+      expect(Math.abs(brand.y - repo.y)).toBeLessThan(4);
+      expect(brand.x + brand.width).toBeLessThan(repo.x);
+      const keep = (await page.locator('.token-control .remember').boundingBox())!;
+      expect(Math.abs(keep.y - token.y)).toBeLessThan(4);
+      expect(keep.x).toBeGreaterThan(token.x);
+      expect(token.width).toBeLessThanOrEqual(510);
+      if (viewport.width >= 1440) expect(repo.width).toBeGreaterThan(250);
+      await expect(page.locator('.token-control .remember')).toHaveAttribute('title', /Stored unencrypted/);
     }
     expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight && document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await expect(page.locator('.console summary')).toBeInViewport();

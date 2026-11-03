@@ -7,3 +7,19 @@
 @media(max-width:900px){.repo-control,.token-control{display:block}.repo-control>label,.token-control>label{display:block;margin-bottom:4px}.repo-toolbar #fields{gap:4px 10px}.repo-toolbar #storage-status{grid-column:1/-1}.repo-toolbar .remember{grid-column:1/-1}}
 @media(max-width:480px){.repo-toolbar{padding-top:6px}.repo-toolbar #fields{grid-template-columns:minmax(0,1fr)}.repo-control,.token-control{display:flex;gap:6px}.repo-control>label,.token-control>label{font-size:10px;flex:0 0 74px;margin:0}.repo-toolbar .row button{font-size:11px;padding:6px;white-space:nowrap}.repo-toolbar input{padding:6px}.repo-toolbar .remember{font-size:10px}.repo-toolbar #storage-status{font-size:9px;line-height:1.25}.object-picker{padding:6px 8px;gap:8px}.object-picker label{font-size:11px}.object-picker select{min-width:0;flex:1;max-width:100%}header{height:32px}.intro .intro-description{display:none}}
 #app{max-width:none}
+
+/* Brand and repository controls share the top navigation row. */
+header.repo-toolbar{height:auto;display:flex;align-items:flex-start;gap:20px;padding:8px 0 6px}.repo-toolbar .brand{flex-shrink:0;white-space:nowrap;display:flex;align-items:center;min-height:44px}.repo-toolbar form{flex:1;min-width:0}.repo-toolbar #fields{column-gap:14px}.repo-control,.token-control{gap:8px}
+@media(max-width:1100px){.repo-control>label,.token-control>label{font-size:11px}.repo-toolbar .brand{font-size:18px}}
+@media(max-width:760px){header.repo-toolbar{flex-wrap:wrap;gap:4px 12px}.repo-toolbar .brand{min-height:30px}.repo-toolbar form{flex:1 1 100%}.repo-toolbar #fields{column-gap:8px}}
+
+.repo-toolbar #fields{grid-template-columns:minmax(0,1fr) auto}.token-control{display:flex;align-items:center;gap:8px}.token-control #token{width:160px;flex:0 1 160px}.token-control>.remember{display:flex;flex:0 0 auto;gap:5px;margin:0;min-height:44px;white-space:nowrap;font-size:12px}.repo-toolbar #storage-status:empty{display:none}.repo-toolbar #storage-status{grid-column:1/-1}
+@media(max-width:900px){.repo-toolbar #fields{grid-template-columns:minmax(0,1fr)}.repo-control{display:flex;align-items:center}.repo-control>label{margin:0}.token-control>label{margin:0}.token-control #token{flex:1 1 120px;max-width:200px}.token-control>.remember{flex:0 0 auto}}
+@media(max-width:480px){.token-control>label[for=token]{flex:0 0 74px}.token-control #token{min-width:0;width:120px}.token-control>.remember{font-size:11px}}
+/* Give long GitHub tokens most of the desktop connection row. */
+.repo-toolbar #fields{grid-template-columns:auto minmax(0,1fr)}.repo-control #repo{width:20ch;flex:0 1 20ch}.repo-control .row{flex:0 1 auto}.token-control #token{width:100ch;max-width:100%;flex:1 1 100ch;min-width:0;font-family:ui-monospace,monospace}
+@media(max-width:1100px){.repo-control #repo{width:15ch;flex-basis:15ch}.repo-toolbar .brand{font-size:16px}header.repo-toolbar{gap:12px}}
+@media(max-width:900px){.repo-toolbar #fields{grid-template-columns:minmax(0,1fr)}.repo-control .row{flex:1}.repo-control #repo{width:100%;flex:1;min-width:0}.token-control #token{width:100%;max-width:none;flex:1;min-width:0}}
+/* Prioritize the repository name; keep the token at a compact 50 characters. */
+.repo-toolbar #fields{grid-template-columns:minmax(0,1fr) auto}.repo-control .row{flex:1;min-width:0}.repo-control #repo{width:100%;flex:1;min-width:0}.token-control #token{width:50ch;max-width:50ch;flex:0 1 50ch}
+@media(max-width:900px){.repo-toolbar #fields{grid-template-columns:minmax(0,1fr)}.token-control #token{width:50ch;max-width:50ch;flex:1 1 50ch;min-width:0}}
