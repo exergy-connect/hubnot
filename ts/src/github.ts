@@ -1,4 +1,4 @@
-import { displayOpening, type ObjectType } from './objects';
+import { displayOpening, objectTypes, type ObjectType } from './objects';
 import type { SignedIssue } from './protocol';
 import { verifyActorEvent, type IssueOpening } from './issues';
 export class GitHub {
@@ -28,10 +28,20 @@ export class GitHub {
   }
   async listIssues(): Promise<IssueOpening[]> { return this.listObjects('issue'); }
   async listObjects(type: ObjectType): Promise<IssueOpening[]> {
+    return (await this.readActorObjects(type)).objects;
+  }
+  async summarizeObjects() {
+    const { objects, lastChanged, eventCount } = await this.readActorObjects();
+    const counts = Object.fromEntries(Object.keys(objectTypes).map(type => [type, 0])) as Record<ObjectType, number>;
+    for (const object of objects) counts[object.type!]++;
+    return { total: objects.length, counts, lastChanged, eventCount };
+  }
+  private async readActorObjects(type?: ObjectType) {
     const refs = await this.request<{ ref: string; object: { sha: string; type: string } }[]>('/git/matching-refs/hn/actors/');
     if (!Array.isArray(refs) || refs.length > 100) throw new Error('This PoC supports up to 100 actor histories. Use the CLI for larger repositories.');
     const issues = new Map<string, IssueOpening>();
     let count = 0;
+    let lastChanged: string | null = null;
     for (const ref of refs) {
       if (!/^refs\/hn\/actors\/[a-f0-9]{64}$/.test(ref.ref) || ref.object.type !== 'commit') throw new Error('Invalid actor reference.');
       const actor = ref.ref.split('/').at(-1)!;
@@ -59,16 +69,19 @@ export class GitHub {
         if (expected && (id !== expected.id || event.sequence !== expected.sequence)) throw new Error('Broken actor event chain.');
         if (!entry.parents.length && (event.sequence !== 1 || event.previous)) throw new Error('Invalid actor root.');
         if (entry.parents.length && (!event.previous || event.sequence < 2)) throw new Error('Missing event predecessor.');
-        if (event.kind === `${type}.open`) {
-          if (type === 'issue' && (typeof event.title !== 'string' || !event.title.trim())) throw new Error('Invalid issue opening.');
-          const content = displayOpening(type, event.title, event.body);
-          issues.set(id, { id, ...content, author: event.actorName, timestamp: event.timestamp });
+        if (!lastChanged || Date.parse(event.timestamp) > Date.parse(lastChanged)) lastChanged = event.timestamp;
+        const family = event.kind.endsWith('.open') ? event.kind.slice(0, -5) : '';
+        if (Object.hasOwn(objectTypes, family) && (!type || family === type)) {
+          const openingType = family as ObjectType;
+          if (openingType === 'issue' && (typeof event.title !== 'string' || !event.title.trim())) throw new Error('Invalid issue opening.');
+          const content = displayOpening(openingType, event.title, event.body);
+          issues.set(id, { id, type: openingType, ...content, author: event.actorName, timestamp: event.timestamp });
         }
         expected = { id: event.previous || '', sequence: event.sequence - 1 };
         commit = entry.parents[0]?.sha;
       }
     }
-    return [...issues.values()].sort((a, b) => b.timestamp.localeCompare(a.timestamp) || a.id.localeCompare(b.id));
+    return { objects: [...issues.values()].sort((a, b) => b.timestamp.localeCompare(a.timestamp) || a.id.localeCompare(b.id)), lastChanged, eventCount: count };
   }
   async prepare(issue: SignedIssue): Promise<string> {
     const tree = await this.request<{ sha: string }>('/git/trees', 'POST', { tree: [

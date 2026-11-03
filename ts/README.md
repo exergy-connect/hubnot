@@ -244,3 +244,15 @@ permission to write someone else's remote or bypass project admission policy.
 
 The brief **keep** checkbox sits beside the token field (sized for 50 characters on wide screens, with remaining space prioritized for the repository). Hover over it
 for storage details; the same explanation is available to screen readers.
+
+A green tick beside each displayed event ID marks signature and actor-chain
+verification. Hover for the exact checks, or tap/click for the same explanation.
+It does not indicate full schema/dependency validation, policy admission or a
+verified real-world author identity.
+
+**Check repo** now verifies native actor histories and summarizes supported
+object openings by type, total verified events and the latest signed-event
+timestamp (including later comments/revisions). That date is signer-reported,
+not GitHub server time or a trusted last-modification time. Zero objects is
+reported explicitly; invalid history, API errors or scan limits fail the check
+rather than presenting a partial count. Memory/artifact streams are not scanned.

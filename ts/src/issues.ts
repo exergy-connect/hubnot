@@ -2,7 +2,7 @@ import { ed25519 } from '@noble/curves/ed25519.js';
 import { digest } from './protocol';
 
 export interface IssueOpening {
-  id: string; title: string; body: string; author: string; timestamp: string;
+  id: string; title: string; body: string; author: string; timestamp: string; type?: import('./objects').ObjectType;
 }
 export interface ActorEvent {
   protocol: string; kind: string; actor: string; actorName: string;

@@ -23,3 +23,5 @@ header.repo-toolbar{height:auto;display:flex;align-items:flex-start;gap:20px;pad
 /* Prioritize the repository name; keep the token at a compact 50 characters. */
 .repo-toolbar #fields{grid-template-columns:minmax(0,1fr) auto}.repo-control .row{flex:1;min-width:0}.repo-control #repo{width:100%;flex:1;min-width:0}.token-control #token{width:50ch;max-width:50ch;flex:0 1 50ch}
 @media(max-width:900px){.repo-toolbar #fields{grid-template-columns:minmax(0,1fr)}.token-control #token{width:50ch;max-width:50ch;flex:1 1 50ch;min-width:0}}
+
+.object-identity{display:flex;align-items:center;gap:6px}.object-identity code{min-width:0;overflow-wrap:anywhere}.verification-tick{background:transparent;color:#23723b;font-size:20px;line-height:1;flex:0 0 44px;width:44px;min-height:44px;padding:8px}.verification-tick:hover,.verification-tick:focus-visible{background:#e8edde}.verification-details{border-left:2px solid #23723b;padding-left:10px}

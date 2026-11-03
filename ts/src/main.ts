@@ -100,16 +100,30 @@ function lock(locked: boolean) {
   element<HTMLButtonElement>('download').disabled = locked;
   element<HTMLSelectElement>('object-type').disabled = locked;
 }
+let repoCheckGeneration = 0;
+for (const id of ['repo', 'token']) element(id).addEventListener('input', () => {
+  repoCheckGeneration++;
+  element('repo-status').textContent = '';
+  element<HTMLButtonElement>('inspect').disabled = false;
+});
 element('inspect').onclick = async () => {
+  const generation = ++repoCheckGeneration;
   const output = element('repo-status');
   const button = element<HTMLButtonElement>('inspect');
   button.disabled = true;
   output.textContent = 'Checking repository…';
   try {
-    const repo = await new GitHub(parseRepo(value('repo')), value('token').trim()).inspect();
-    output.textContent = `${repo.full_name} · ${repo.permissions?.push ? 'Write access available' : 'Token with Contents write access required'}${repo.description ? ` · ${repo.description}` : ''}`;
-  } catch (error) { output.textContent = String(error); }
-  finally { button.disabled = false; }
+    const client = new GitHub(parseRepo(value('repo')), value('token').trim());
+    const repo = await client.inspect();
+    if (generation !== repoCheckGeneration) return;
+    output.textContent = 'Verifying Hubnot histories and counting objects…';
+    const summary = await client.summarizeObjects();
+    if (generation !== repoCheckGeneration) return;
+    const breakdown = Object.entries(summary.counts).filter(([, count]) => count > 0).map(([type, count]) => `${count} ${count === 1 ? objectTypes[type as ObjectType].singular : objectTypes[type as ObjectType].plural}`).join(', ');
+    const latest = summary.lastChanged ? new Date(summary.lastChanged).toLocaleString() : 'none';
+    output.textContent = `${repo.full_name} · ${summary.total ? `${summary.total} supported Hubnot object${summary.total === 1 ? '' : 's'} (${breakdown})` : 'No supported Hubnot objects found'} · Latest signed event: ${latest} · ${summary.eventCount} verified event${summary.eventCount === 1 ? '' : 's'} · ${repo.permissions?.push ? 'Write access available' : 'Read access; publishing needs a token with Contents write access'}. Counts cover original openings; dates are signer-reported.`;
+  } catch (error) { if (generation === repoCheckGeneration) output.textContent = `Repository check failed: ${String(error)}`; }
+  finally { if (generation === repoCheckGeneration) button.disabled = false; }
 };
 async function publish() {
   if (!pending || busy) return;
@@ -212,7 +226,20 @@ async function loadIssues() {
       const meta = document.createElement('p'); meta.className = 'hint'; meta.textContent = `${issue.author} · ${new Date(issue.timestamp).toLocaleString()}`;
       const body = document.createElement('p'); body.className = 'issue-body'; body.textContent = issue.body;
       const id = document.createElement('code'); id.textContent = issue.id;
-      card.append(title, meta, body, id);
+      const verificationText = 'Verified: Ed25519 signature over the exact event bytes; SHA-256 event ID and public-key fingerprint matching the actor; hn/0 protocol, positive sequence and parseable timestamp; linear actor ancestry with matching predecessor hashes and sequence continuity. This is not full schema, dependency or policy-admission validation, and does not establish the author’s real-world identity.';
+      const verified = document.createElement('button');
+      verified.type = 'button'; verified.className = 'verification-tick'; verified.textContent = '✓';
+      verified.title = verificationText;
+      verified.setAttribute('aria-label', 'Signature and actor chain verified. Show verification details.');
+      verified.setAttribute('aria-expanded', 'false');
+      const explanation = document.createElement('p');
+      explanation.className = 'hint verification-details'; explanation.hidden = true;
+      explanation.id = `verification-${issue.id.slice(7)}`; explanation.textContent = verificationText;
+      verified.setAttribute('aria-controls', explanation.id);
+      verified.onclick = () => { explanation.hidden = !explanation.hidden; verified.setAttribute('aria-expanded', String(!explanation.hidden)); };
+      const identity = document.createElement('div'); identity.className = 'object-identity';
+      identity.append(id, verified);
+      card.append(title, meta, body, identity, explanation);
       element('issues-list').append(card);
     }
     output.textContent = issues.length ? `${issues.length} signed ${objectTypes[currentType].singular} opening${issues.length === 1 ? '' : 's'}.` : `No native Hubnot ${objectTypes[currentType].plural} found in this repository.`;

@@ -13,7 +13,7 @@ test('mobile publishes a verifiable native issue without native Ed25519 or Abort
     const request = route.request();
     const path = new URL(request.url()).pathname;
     if (request.method() === 'POST') writes.push({ path, data: request.postDataJSON() });
-    const data = path.endsWith('/branches') ? [{ name: 'main' }]
+    const data = path.includes('/git/matching-refs/') ? [] : path.endsWith('/branches') ? [{ name: 'main' }]
       : path.endsWith('/git/trees') ? { sha: 'a'.repeat(40) }
       : path.endsWith('/git/commits') ? { sha: 'b'.repeat(40) }
       : path.endsWith('/git/refs') ? { ref: 'ok' }
@@ -112,6 +112,15 @@ test('existing issues tab reads signed native openings, safely renders text and 
   await expect(page.locator('.issue-card h2')).toHaveText('<img src=x onerror=alert(1)>');
   await expect(page.locator('.issue-card img')).toHaveCount(0);
   await expect(page.locator('.issue-body')).toHaveText('Original issue body');
+  const tick = page.locator('.verification-tick');
+  await expect(tick).toHaveText('✓');
+  await expect(tick).toHaveAttribute('title', /Ed25519 signature over the exact event bytes/);
+  await expect(tick).toHaveAttribute('title', /not full schema, dependency or policy-admission validation/);
+  await tick.tap();
+  await expect(page.locator('.verification-details')).toBeVisible();
+  await expect(tick).toHaveAttribute('aria-expanded', 'true');
+  await tick.tap();
+  await expect(page.locator('.verification-details')).toBeHidden();
   await page.getByRole('tab', { name: 'New signed issue' }).tap();
   await expect(page.locator('#title')).toHaveValue('Keep this draft');
   await page.locator('#new-tab').press('ArrowLeft');
@@ -154,6 +163,10 @@ test('object selector scopes tabs, preserves drafts and publishes each resource 
     await route.fulfill({ json: data });
   });
   await page.goto('/');
+  await page.locator('#inspect').tap();
+  await expect(page.locator('#repo-status')).toContainText('2 supported Hubnot objects (1 project, 1 discussion)');
+  await expect(page.locator('#repo-status')).toContainText('Latest signed event:');
+  await expect(page.locator('#repo-status')).toContainText('2 verified events');
   await page.locator('#title').fill('Issue draft');
   await page.locator('#object-type').selectOption('project');
   await page.locator('#title').fill('Project draft');
