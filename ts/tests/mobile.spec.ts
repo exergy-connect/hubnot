@@ -168,18 +168,18 @@ test('object selector scopes tabs, preserves drafts and publishes each resource 
   await expect(page.locator('#repo-status')).toContainText('Latest signed event:');
   await expect(page.locator('#repo-status')).toContainText('2 verified events');
   await page.locator('#title').fill('Issue draft');
-  await page.locator('#object-type').selectOption('project');
+  await page.getByRole('radio', { name: 'Project', exact: true }).check();
   await page.locator('#title').fill('Project draft');
-  await page.locator('#object-type').selectOption('issue');
+  await page.getByRole('radio', { name: 'Issue', exact: true }).check();
   await expect(page.locator('#title')).toHaveValue('Issue draft');
-  await page.locator('#object-type').selectOption('project');
+  await page.getByRole('radio', { name: 'Project', exact: true }).check();
   await expect(page.locator('#title')).toHaveValue('Project draft');
   await page.getByRole('tab', { name: 'Existing projects', exact: true }).tap();
   await expect(page.locator('#issues-status')).toHaveText('1 signed project opening.');
   await expect(page.locator('.issue-card h2')).toHaveText('Parent project');
   await page.getByRole('tab', { name: 'New signed project', exact: true }).tap();
   for (const type of ['project', 'discussion', 'workflow', 'project-item', 'discussion-reply']) {
-    await page.locator('#object-type').selectOption(type);
+    await page.locator(`#object-type input[value="${type}"]`).check();
     await page.locator('#token').fill('mock-token');
     await page.locator('#name').fill('Resource author');
     if (type !== 'discussion-reply') await page.locator('#title').fill(`${type} title`);

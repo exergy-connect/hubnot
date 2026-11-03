@@ -15,9 +15,8 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     </fieldset></form></header>
   <main><div class="intro"><h1>PERMISSIONLESS COLLABORATION.</h1><p class="promise">No installation. No accounts. No gatekeepers.</p><p class="ownership">Your objects. Your signature. Your repository.</p><p class="intro-description">Explore native Hubnot objects or create and cryptographically sign your own — entirely in your browser.</p></div>
   <section class="workspace" aria-label="Hubnot issues"><aside class="object-picker">
-    <label for="object-type">Hubnot object type</label>
-    <select id="object-type">${Object.entries(objectTypes).map(([id, info]) => `<option value="${id}">${info.singular[0].toUpperCase() + info.singular.slice(1)}</option>`).join('')}
-    <optgroup label="CLI-only in this PoC"><option disabled>Proposals and reviews</option><option disabled>CI requests and results</option><option disabled>Decisions and merge facts</option><option disabled>Identity relationships</option><option disabled>Memory records</option><option disabled>Audit facts</option><option disabled>Custom artifacts</option></optgroup></select>
+    <fieldset id="object-type"><legend>Hubnot object type</legend><div class="object-type-options">${Object.entries(objectTypes).map(([id, info]) => `<label><input type="radio" name="object-type" value="${id}" ${id === 'issue' ? 'checked' : ''}><span>${info.singular[0].toUpperCase() + info.singular.slice(1)}</span></label>`).join('')}</div></fieldset>
+    <p class="hint type-limit">Other object families are available through the native CLI.</p>
     </aside><div class="object-workspace"><div class="tabs" role="tablist" aria-label="Issues">
       <button id="existing-tab" type="button" role="tab" aria-selected="false" aria-controls="existing-panel" tabindex="-1">Existing issues</button>
       <button id="new-tab" type="button" role="tab" aria-selected="true" aria-controls="new-panel">New signed issue</button>
@@ -98,7 +97,7 @@ function lock(locked: boolean) {
   element<HTMLFieldSetElement>('new-fields').disabled = locked;
   element<HTMLButtonElement>('submit').disabled = locked;
   element<HTMLButtonElement>('download').disabled = locked;
-  element<HTMLSelectElement>('object-type').disabled = locked;
+  element<HTMLFieldSetElement>('object-type').disabled = locked;
 }
 let repoCheckGeneration = 0;
 for (const id of ['repo', 'token']) element(id).addEventListener('input', () => {
@@ -142,7 +141,7 @@ async function publish() {
     element<HTMLButtonElement>('another').hidden = false;
     element<HTMLInputElement>('token').value = '';
     pending = undefined;
-    element<HTMLSelectElement>('object-type').disabled = false;
+    element<HTMLFieldSetElement>('object-type').disabled = false;
   } catch (error) {
     status.textContent = `${String(error)}. Publication may be incomplete. Retry reuses this signed issue and reconciles the exact reference. Keep this page open.`;
     element('result').hidden = false;
@@ -284,7 +283,7 @@ function readDraft(): ObjectInput {
 }
 element('object-type').onchange = () => {
   drafts.set(currentType, readDraft());
-  currentType = value('object-type') as ObjectType;
+  currentType = element<HTMLFieldSetElement>('object-type').querySelector<HTMLInputElement>('input:checked')!.value as ObjectType;
   lock(false);
   const draft = drafts.get(currentType);
   for (const [id, text] of Object.entries({ title: draft?.title || '', body: draft?.body || '', category: draft?.category || 'general', 'parent-id': draft?.parent || '', 'project-revision': draft?.revision || '', 'workflow-name': draft?.workflowName || '' })) {

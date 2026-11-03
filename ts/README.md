@@ -143,7 +143,7 @@ Changing repositories or tokens clears results and discards stale responses.
 
 ## Object type selector
 
-The dropdown scopes both tabs to one of six supported native `hn/0` types:
+The visible object-type radio buttons scope both tabs to one of six supported native `hn/0` types:
 
 | Type | Creation fields and behavior |
 | --- | --- |
@@ -209,7 +209,7 @@ the signed event and known commit in memory; `hn retry` reuses them and requires
 the original repository to remain selected. Further creation is blocked until
 that retry succeeds. Keep the page open and save the displayed event/ref/commit
 receipt for recovery. Form and console writes are serialized. The console's
-object type comes from the command, independently of the dropdown selection.
+object type comes from the command, independently of the object-type selection.
 
 The workspace fits the browser viewport. The hn / hubnot brand, repository, Check repo button and access token share
 one full-width top row on desktop. Mobile wraps these controls; the object workspace sits below. Long results and short viewports
@@ -256,3 +256,6 @@ timestamp (including later comments/revisions). That date is signer-reported,
 not GitHub server time or a trusted last-modification time. Zero objects is
 reported explicitly; invalid history, API errors or scan limits fail the check
 rather than presenting a partial count. Memory/artifact streams are not scanned.
+
+Object type choices are rendered inline in the page, rather than in an
+OS-managed select popup, so they appear in browser video recordings.
