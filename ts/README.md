@@ -29,7 +29,7 @@ npx playwright install chromium webkit
 npm run test:browser
 ```
 
-`../public/` can be served by any static HTTPS host. Vite uses relative asset URLs,
+`../docs/` can be served by any static HTTPS host. Vite uses relative asset URLs,
 so the build also works under a subdirectory.
 
 ## Create an issue
@@ -97,15 +97,20 @@ from the repository root). No live GitHub writes are performed by tests.
 
 `.github/workflows/browser.yml` runs the unit tests, minifies JavaScript/CSS,
 and tests the production build in Chromium (Android profile) and WebKit (iPhone
-profile). Builds are uploaded as the `hubnot-public` workflow artifact. On pushes
+profile). Builds are uploaded as the `hubnot-docs` workflow artifact. On pushes
 to `main` or manual runs on `main`, a separate job commits the generated root
-`public/` directory back to `main`. Pull requests never publish. Bot commits do
+`docs/` directory back to `main`. Pull requests never publish. Bot commits do
 not retrigger the workflow. A stale build is rejected rather than overwriting a
 newer source revision; rerun against the latest `main` if that happens.
 
 The repository must allow the workflow's `contents: write` token to push to
 `main`; protected branch rules may prevent publication. No token secret is
 needed for the build workflow. This publishes static files to Git, not a hosting
-service: serve `public/` over HTTPS for phones (a LAN HTTP address is not a secure
-context). Relative asset paths allow hosting at `/public/` or a repository subpath.
+service: serve `docs/` over HTTPS for phones (a LAN HTTP address is not a secure
+context). Relative asset paths allow hosting at `/docs/` or a repository subpath.
 Mobile checks are browser emulation, not physical device certification.
+
+The bundle uses `docs/index.html`, `docs/LICENSES.txt`, and `docs/browser-assets/`.
+Existing Markdown documentation is preserved; the workflow replaces only the
+generated `docs/browser-assets/` directory. The uploaded artifact includes only
+the browser bundle files.
