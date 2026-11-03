@@ -163,6 +163,10 @@ compacted.
 
 ## Build and verify
 
+A minimal browser-only TypeScript client in [`ts/`](ts/README.md) can sign and
+publish native issues to a selected GitHub repository without a local Hubnot
+installation. It is a creation-only proof of concept with temporary identities.
+
 Building from source requires Go 1.26 or newer and Git 2.x. Docker and Python
 are not required for the following build and test commands.
 
