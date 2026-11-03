@@ -45,3 +45,45 @@ test('mobile publishes a verifiable native issue without native Ed25519 or Abort
   await expect(page.locator('#title')).toHaveValue('');
   expect(errors).toEqual([]);
 });
+
+test('tokens are opt-in, scoped to canonical repository, restored and removable', async ({ page }) => {
+  await page.goto('/');
+  const token = page.locator('#token');
+  const remember = page.locator('#remember-token');
+  const repo = page.locator('#repo');
+  await expect(remember).not.toBeChecked();
+  await token.fill('unsaved-token');
+  await page.reload();
+  await expect(token).toHaveValue('');
+  await token.fill('repo-one-token');
+  await remember.check();
+  await page.reload();
+  await expect(token).toHaveValue('repo-one-token');
+  await expect(remember).toBeChecked();
+  await repo.fill('other/project');
+  await expect(token).toHaveValue('');
+  await expect(remember).not.toBeChecked();
+  await token.fill('repo-two-token');
+  await remember.check();
+  await repo.fill('https://github.com/EXERGY-CONNECT/HUBNOT.git');
+  await expect(token).toHaveValue('repo-one-token');
+  await remember.uncheck();
+  await page.reload();
+  await expect(token).toHaveValue('');
+  await expect(remember).not.toBeChecked();
+  await repo.fill('other/project');
+  await expect(token).toHaveValue('repo-two-token');
+});
+
+test('blocked storage leaves token usable in memory', async ({ page }) => {
+  await page.addInitScript(() => {
+    Storage.prototype.getItem = () => { throw new Error('Storage blocked'); };
+    Storage.prototype.setItem = () => { throw new Error('Storage blocked'); };
+  });
+  await page.goto('/');
+  await page.locator('#token').fill('memory-token');
+  await page.locator('#remember-token').click();
+  await expect(page.locator('#remember-token')).not.toBeChecked();
+  await expect(page.locator('#token')).toHaveValue('memory-token');
+  await expect(page.locator('#storage-status')).toContainText('storage is unavailable');
+});

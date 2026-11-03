@@ -9,7 +9,8 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     <fieldset id="fields"><legend>01 / Choose a repository</legend>
     <label for="repo">GitHub repository</label><div class="row"><input id="repo" name="repo" value="exergy-connect/hubnot" required spellcheck="false" autocapitalize="none" autocorrect="off"><button id="inspect" type="button" class="secondary">Check repo</button></div>
     <label for="token">GitHub access token</label><input id="token" name="token" type="password" autocomplete="off" spellcheck="false" autocapitalize="none" autocorrect="off" placeholder="Fine-grained token · Contents: read and write" required>
-    <p class="hint">Sent only to api.github.com. Kept in memory for this page; never saved.</p>
+    <label class="remember"><input id="remember-token" type="checkbox"> Remember token for this repository on this browser</label>
+    <p class="hint" id="storage-status" role="status">Optional: saved tokens are stored unencrypted on this browser and accessible to scripts on this site. Uncheck to remove the saved token.</p>
     <p id="repo-status" role="status"></p>
     <div class="divider">02 / Write an issue</div>
     <label for="name">Author name</label><input id="name" name="name" placeholder="Your name" maxlength="200" required>
@@ -24,6 +25,45 @@ const value = (id: string) => element<HTMLInputElement>(id).value;
 const status = element<HTMLParagraphElement>('status');
 let pending: { client: GitHub; issue: SignedIssue; commit?: string } | undefined;
 let busy = false;
+const tokenInput = element<HTMLInputElement>('token');
+const rememberToken = element<HTMLInputElement>('remember-token');
+let tokenRepo: string | undefined;
+function selectedRepo() {
+  try { return parseRepo(value('repo')).toLowerCase(); } catch { return undefined; }
+}
+function storageKey(repo: string) { return `hubnot:github-token:${repo}`; }
+function storageFailed() {
+  rememberToken.checked = false;
+  element('storage-status').textContent = 'Browser storage is unavailable. The token will only be used in memory.';
+}
+function restoreToken() {
+  tokenRepo = selectedRepo();
+  tokenInput.value = '';
+  rememberToken.checked = false;
+  if (!tokenRepo) return;
+  try {
+    const saved = localStorage.getItem(storageKey(tokenRepo));
+    if (saved) { tokenInput.value = saved; rememberToken.checked = true; }
+  } catch { storageFailed(); }
+}
+function saveTokenPreference() {
+  const repo = selectedRepo();
+  if (!repo) { rememberToken.checked = false; return; }
+  try {
+    if (rememberToken.checked && tokenInput.value.trim()) {
+      localStorage.setItem(storageKey(repo), tokenInput.value.trim());
+    } else {
+      localStorage.removeItem(storageKey(repo));
+    }
+  } catch { storageFailed(); }
+}
+element('repo').addEventListener('input', () => {
+  if (selectedRepo() !== tokenRepo) restoreToken();
+});
+rememberToken.addEventListener('change', saveTokenPreference);
+tokenInput.addEventListener('input', saveTokenPreference);
+restoreToken();
+
 function lock(locked: boolean) {
   element<HTMLFieldSetElement>('fields').disabled = locked;
   element<HTMLButtonElement>('submit').disabled = locked;
@@ -82,5 +122,6 @@ element('another').onclick = () => {
   element<HTMLInputElement>('title').value = '';
   element<HTMLTextAreaElement>('body').value = '';
   status.textContent = '';
+  restoreToken();
   lock(false);
 };

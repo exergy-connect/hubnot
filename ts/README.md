@@ -41,9 +41,17 @@ so the build also works under a subdirectory.
 3. Check the repository, enter your author name, title and optional description.
 4. Choose **Sign & publish issue**. Save the displayed receipt.
 
-The token stays in page memory and goes only to `https://api.github.com`.
-There are no analytics, remote fonts, third-party runtime scripts or persistent
-browser storage. Success clears the token input. Reloading discards session state.
+The token goes only to `https://api.github.com`. By default it stays in page
+memory. **Remember token for this repository on this browser** opts into
+`localStorage`, keyed by the normalized `owner/repo` (GitHub URL and case variants
+share the same entry). Selecting a different repository clears the current token
+and restores only that repository's saved token. Unchecking removes that entry;
+other repositories' saved tokens are preserved. Saved tokens are unencrypted and
+accessible to scripts on the same site; use this option only on a trusted browser.
+If storage is blocked, the interface reports it and continues using memory only.
+There are no analytics, remote fonts, or third-party runtime scripts. Success
+clears the token input; a saved token is restored for the next issue or reload.
+Reloading discards publication/retry state, regardless of the token preference.
 
 ## Native format and transport
 
