@@ -1,0 +1,6 @@
+{
+  "id": "sha256:19e935058f9d4a81839292b765e6367c6bac4af6a9fc1b065f7e0a68c2aca827",
+  "actor": "812530bd61560722470afee7ab51c315b9048048f282d5215654903069046bc4",
+  "payload": "{\"protocol\":\"hn/0\",\"kind\":\"issue.open\",\"actor\":\"812530bd61560722470afee7ab51c315b9048048f282d5215654903069046bc4\",\"actorName\":\"Browser fixture\",\"publicKey\":\"4GSW9+nQK6c+lHSTaju2Y8Vvbk4QhEExidshQbDOuXM\",\"sequence\":1,\"timestamp\":\"2026-11-03T21:05:00.584Z\",\"title\":\"TypeScript → Hubnot 🐈\",\"body\":\"Exact bytes: <>&\\nSecond line.\"}",
+  "signature": "ybkoE3W3FPSNHsk8I3r7yyUtS9QzR8B3DIa+PowrYr+HyY8ReupdJAIaZZ93OLcw/UzA0PNzWk8Spr8EUiJfDw"
+}
