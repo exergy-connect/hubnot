@@ -211,7 +211,33 @@ that retry succeeds. Keep the page open and save the displayed event/ref/commit
 receipt for recovery. Form and console writes are serialized. The console's
 object type comes from the command, independently of the dropdown selection.
 
-The workspace fits the browser viewport. Desktop uses a connection sidebar and
-object panel; mobile stacks them compactly. Long results and short viewports
+The workspace fits the browser viewport. The repository, Check repo button and access token occupy a full-width top
+row on desktop. Mobile wraps these controls; the object workspace sits below. Long results and short viewports
 scroll inside their panels rather than scrolling the whole page. The expanded
 CLI overlays the workspace and closes by clicking its heading again.
+
+## Permissionless signing and sharing
+
+**Permissionless collaboration. No installation. No accounts. No gatekeepers.**
+
+Your objects. Your signature. Your repository. Explore native Hubnot objects or
+create and cryptographically sign your own entirely in the browser.
+
+Choose **Sign & download** to generate a fresh signing key and download a signed
+object without a GitHub account, token, remote request or repository write access.
+The author name, object fields and selected repository are sufficient. Share the
+file through any channel. Public browsing also needs no account; GitHub's anonymous
+API rate limits still apply.
+
+The JSON download uses `format: hubnot.browser-signed-object/1` and contains the
+exact signed `payload`, raw-base64 `signature`, event `id`, actor fingerprint and
+an unsigned `repositoryHint`. The hint is routing metadata, not an authenticated
+claim; the `hn/0` payload and its signature remain unchanged. No private key is
+exported. This download is a signed-event handoff, not a native `hn.contribution/1`
+archive or an automatically imported/published contribution. Recipient tooling
+must verify and transport the event into Git; this PoC has no packet import UI.
+Parent dependencies for downloaded child objects are not remotely checked.
+
+**Sign & publish** remains an optional direct GitHub transport and requires a
+GitHub token with repository write access. Account-free signing does not confer
+permission to write someone else's remote or bypass project admission policy.

@@ -245,6 +245,16 @@ test('workspace fits the viewport and console opens only on click', async ({ pag
   await expect(page.locator('#cli-input')).toBeHidden();
   for (const viewport of [{ width: 1440, height: 900 }, { width: 1280, height: 720 }, { width: 390, height: 844 }, { width: 320, height: 568 }]) {
     await page.setViewportSize(viewport);
+    if (viewport.width >= 1000) {
+      const repo = (await page.locator('#repo').boundingBox())!;
+      const check = (await page.locator('#inspect').boundingBox())!;
+      const token = (await page.locator('#token').boundingBox())!;
+      expect(Math.abs(repo.y - token.y)).toBeLessThan(4);
+      expect(Math.abs(repo.y - check.y)).toBeLessThan(4);
+      expect(repo.x).toBeLessThan(check.x);
+      expect(check.x).toBeLessThan(token.x);
+      expect(token.y).toBeLessThan((await page.locator('header').boundingBox())!.y);
+    }
     expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight && document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await expect(page.locator('.console summary')).toBeInViewport();
     await page.locator('.console summary').tap();
@@ -252,4 +262,32 @@ test('workspace fits the viewport and console opens only on click', async ({ pag
     expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight)).toBe(true);
     await page.locator('.console summary').tap();
   }
+});
+
+test('permissionless signing downloads a verifiable object without account, token or network writes', async ({ page }) => {
+  const { readFile } = await import('node:fs/promises');
+  const { digest } = await import('../src/protocol');
+  let apiCalls = 0;
+  await page.route('https://api.github.com/**', route => { apiCalls++; return route.abort(); });
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'PERMISSIONLESS COLLABORATION.' })).toBeVisible();
+  await page.locator('#name').fill('Independent contributor');
+  await page.locator('#title').fill('A contribution without an account');
+  await page.locator('#body').fill('Signed entirely in this browser.');
+  await expect(page.locator('#token')).toHaveValue('');
+  const downloadPromise = page.waitForEvent('download');
+  await page.locator('#download').tap();
+  const download = await downloadPromise;
+  const packet = JSON.parse(await readFile((await download.path())!, 'utf8'));
+  expect(packet.format).toBe('hubnot.browser-signed-object/1');
+  expect(packet.repositoryHint).toBe('exergy-connect/hubnot');
+  const event = JSON.parse(packet.payload);
+  const payload = new TextEncoder().encode(packet.payload);
+  expect(event.title).toBe('A contribution without an account');
+  expect(packet.id).toBe(`sha256:${await digest(payload)}`);
+  expect(ed25519.verify(Buffer.from(packet.signature, 'base64'), payload, Buffer.from(event.publicKey, 'base64'))).toBe(true);
+  expect(Object.keys(packet).sort()).toEqual(['actor', 'format', 'id', 'payload', 'repositoryHint', 'signature']);
+  expect(apiCalls).toBe(0);
+  await expect(page.locator('#status')).toContainText('Signed locally and downloaded');
+  await expect(page.locator('#download')).toBeEnabled();
 });

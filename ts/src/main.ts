@@ -5,16 +5,17 @@ import { openingFields, objectTypes, type ObjectType, type ObjectInput } from '.
 import { GitHub } from './github';
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <header><a href="./" class="brand">h<span>n</span> / hubnot</a><span class="badge">BROWSER LAB · 01</span></header>
-  <main><div class="intro"><h1>Repository workspace</h1><p>Signed collaboration, stored in Git.</p></div>
-  <section class="workspace" aria-label="Hubnot issues"><aside class="connection"><form id="issue-form">
-    <fieldset id="fields"><legend>01 / Choose a repository</legend>
-    <label for="repo">GitHub repository</label><div class="row"><input id="repo" name="repo" value="exergy-connect/hubnot" required spellcheck="false" autocapitalize="none" autocorrect="off"><button id="inspect" type="button" class="secondary">Check repo</button></div>
-    <label for="token">GitHub access token</label><input id="token" name="token" type="password" autocomplete="off" spellcheck="false" autocapitalize="none" autocorrect="off" placeholder="Optional for public browsing · required to publish">
+  <section class="repo-toolbar" aria-label="Repository connection"><form id="issue-form">
+    <fieldset id="fields"><legend class="visually-hidden">Repository connection</legend>
+    <div class="repo-control"><label for="repo">GitHub repository</label><div class="row"><input id="repo" name="repo" value="exergy-connect/hubnot" required spellcheck="false" autocapitalize="none" autocorrect="off"><button id="inspect" type="button" class="secondary">Check repo</button></div></div>
+    <div class="token-control"><label for="token">GitHub access token</label><input id="token" name="token" type="password" autocomplete="off" spellcheck="false" autocapitalize="none" autocorrect="off" placeholder="Optional · only needed for GitHub access"></div>
     <label class="remember"><input id="remember-token" type="checkbox"> Remember token for this repository on this browser</label>
     <p class="hint" id="storage-status" role="status">Optional: saved tokens are stored unencrypted on this browser and accessible to scripts on this site. Uncheck to remove the saved token.</p>
     <p id="repo-status" role="status"></p>
-    </fieldset></form>
+    </fieldset></form></section>
+  <header><a href="./" class="brand">h<span>n</span> / hubnot</a><span class="badge">BROWSER LAB · 01</span></header>
+  <main><div class="intro"><h1>PERMISSIONLESS COLLABORATION.</h1><p class="promise">No installation. No accounts. No gatekeepers.</p><p class="ownership">Your objects. Your signature. Your repository.</p><p class="intro-description">Explore native Hubnot objects or create and cryptographically sign your own — entirely in your browser.</p></div>
+  <section class="workspace" aria-label="Hubnot issues"><aside class="object-picker">
     <label for="object-type">Hubnot object type</label>
     <select id="object-type">${Object.entries(objectTypes).map(([id, info]) => `<option value="${id}">${info.singular[0].toUpperCase() + info.singular.slice(1)}</option>`).join('')}
     <optgroup label="CLI-only in this PoC"><option disabled>Proposals and reviews</option><option disabled>CI requests and results</option><option disabled>Decisions and merge facts</option><option disabled>Identity relationships</option><option disabled>Memory records</option><option disabled>Audit facts</option><option disabled>Custom artifacts</option></optgroup></select>
@@ -37,7 +38,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     <div id="revision-field" hidden><label for="project-revision">Project revision ID (use the opening ID)</label><input id="project-revision" placeholder="sha256:…" autocapitalize="none" spellcheck="false"></div>
     <div id="workflow-field" hidden><label for="workflow-name">Workflow name</label><input id="workflow-name" placeholder="check"><p class="hint">Creates a disabled workflow definition. It does not run code.</p></div>
     <p class="hint">This minimal PoC creates a fresh, temporary Ed25519 actor per object. The key is discarded after signing; identity reuse and issue editing are outside this demo.</p>
-    </fieldset><button id="submit" type="submit">Sign & publish issue <span aria-hidden="true">↗</span></button>
+    </fieldset><div class="creation-actions"><button id="download" type="submit" value="download">Sign & download</button><button id="submit" type="submit">Sign & publish issue <span aria-hidden="true">↗</span></button></div><p class="hint">Sign & download needs no account or token. Direct GitHub publishing requires repository write access.</p>
   </form><p id="status" role="status" aria-live="polite"></p><div id="result" hidden><label for="receipt">Publication receipt</label><textarea id="receipt" readonly rows="3"></textarea><button id="retry" class="secondary" type="button" hidden>Retry this exact publication</button><button id="another" class="secondary" type="button" hidden>Write another issue</button></div></div></div></section>
   <section class="console" aria-label="Hubnot CLI console">
     <details><summary>Hubnot CLI console <span class="console-toggle">click to open</span></summary>
@@ -47,7 +48,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     <form id="cli-form"><label for="cli-input">Command</label><div class="row"><input id="cli-input" placeholder='hn issue list' autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" required><button id="cli-run" type="submit">Run</button><button id="cli-clear" type="button" class="secondary">Clear</button></div></form>
     </details>
   </section>
-  <footer>hn/0 protocol <span>Browser → Ed25519 → GitHub Git objects → refs/hn/actors/*</span></footer></main>`;
+  <footer>Signed locally. Stored in Git. Shared without permission.<span>hn/0 · Your key is your signature.</span></footer></main>`;
 const element = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const value = (id: string) => element<HTMLInputElement>(id).value;
 const status = element<HTMLParagraphElement>('status');
@@ -97,6 +98,7 @@ function lock(locked: boolean) {
   element<HTMLFieldSetElement>('fields').disabled = locked;
   element<HTMLFieldSetElement>('new-fields').disabled = locked;
   element<HTMLButtonElement>('submit').disabled = locked;
+  element<HTMLButtonElement>('download').disabled = locked;
   element<HTMLSelectElement>('object-type').disabled = locked;
 }
 element('inspect').onclick = async () => {
@@ -141,6 +143,22 @@ element<HTMLFormElement>('new-issue-form').onsubmit = async event => {
   formPreparing = true;
   lock(true);
   try {
+    if ((event as SubmitEvent).submitter?.id === 'download') {
+      const repositoryHint = parseRepo(value('repo'));
+      const object = await signObject(currentType, value('name'), readDraft());
+      const packet = { format: 'hubnot.browser-signed-object/1', repositoryHint, ...object };
+      const url = URL.createObjectURL(new Blob([JSON.stringify(packet, null, 2) + '\n'], { type: 'application/json' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `hubnot-${currentType}-${object.id.slice(7, 19)}.json`;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+      status.textContent = 'Signed locally and downloaded. Share this signed object file through any channel; no GitHub write was made.';
+      lock(false);
+      return;
+    }
     status.textContent = 'Checking access and signing locally…';
     if (!value('token').trim()) throw new Error('Enter a GitHub token to publish an issue.');
     const client = new GitHub(parseRepo(value('repo')), value('token').trim());
