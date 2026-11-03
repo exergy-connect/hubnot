@@ -1,3 +1,4 @@
+import { openingFields, type ObjectType, type ObjectInput } from './objects';
 import { ed25519 } from '@noble/curves/ed25519.js';
 
 const utf8 = new TextEncoder();
@@ -9,19 +10,24 @@ export interface SignedIssue { id: string; actor: string; payload: string; signa
 
 // Each opening uses its own actor. No shared signing root or chain reconciliation.
 export async function signIssue(name: string, title: string, body: string): Promise<SignedIssue> {
+  return signObject('issue', name, { title, body });
+}
+export async function signObject(type: ObjectType, name: string, input: ObjectInput): Promise<SignedIssue> {
+  const { title, body } = input;
   if (!name.trim() || /[\r\n\0]/.test(name)) throw new Error('Enter a name without control characters.');
-  if (!title.trim() || utf8.encode(title).length > 1024) throw new Error('Title must be 1–1024 UTF-8 bytes.');
+  if (type !== 'discussion-reply' && (!title.trim() || utf8.encode(title).length > 1024)) throw new Error('Title must be 1–1024 UTF-8 bytes.');
   if (utf8.encode(body).length > 65536) throw new Error('Body must be at most 65536 UTF-8 bytes.');
   if (!globalThis.crypto?.subtle) throw new Error('Open this app over HTTPS (or localhost) to sign issues securely.');
   // Bundled Ed25519 also works on mobile browsers without native Ed25519.
+  const fields = openingFields(type, input);
   const secret = crypto.getRandomValues(new Uint8Array(32));
   try {
     const publicKey = ed25519.getPublicKey(secret);
     const actor = await digest(publicKey);
     // Plain title/body issue.open is the native protocol's minimal valid issue.
-    const event = { protocol: 'hn/0', kind: 'issue.open', actor, actorName: name,
+    const event = { protocol: 'hn/0', kind: `${type}.open`, actor, actorName: name,
       publicKey: base64(publicKey), sequence: 1, timestamp: new Date().toISOString(),
-      title, ...(body ? { body } : {}) };
+      ...fields };
     const payload = JSON.stringify(event);
     const bytes = utf8.encode(payload);
     const signature = ed25519.sign(bytes, secret);

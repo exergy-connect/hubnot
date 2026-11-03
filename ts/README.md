@@ -1,7 +1,6 @@
 # Hubnot in the browser — TypeScript proof of concept
 
-A static, browser-only client that creates real native Hubnot `issue.open`
-events in a selected GitHub repository. Defaults to this checkout's origin,
+A static, browser-only client that browses and creates native Hubnot object openings in a selected GitHub repository. Defaults to this checkout's origin,
 `exergy-connect/hubnot`; enter any `owner/repo` or GitHub repository URL.
 This does not create a GitHub Issues ticket.
 
@@ -32,14 +31,14 @@ npm run test:browser
 `../docs/` can be served by any static HTTPS host. Vite uses relative asset URLs,
 so the build also works under a subdirectory.
 
-## Create an issue
+## Create a signed object
 
 1. Select an initialized repository (at least one branch/commit).
 2. Enter a fine-grained GitHub personal access token scoped to that repository
    with **Contents: read and write**. Organization approval/SSO may also apply.
    A classic token needs appropriate repository access (`repo` for private repos).
-3. Check the repository, enter your author name, title and optional description.
-4. Choose **Sign & publish issue**. Save the displayed receipt.
+3. Check the repository, select the object type, and enter its fields in the New signed tab.
+4. Choose **Sign & publish** for the selected type. Save the displayed receipt.
 
 The token goes only to `https://api.github.com`. By default it stays in page
 memory. **Remember token for this repository on this browser** opts into
@@ -66,7 +65,7 @@ GitHub's Git database REST API creates a tree containing only `event.json` and
 [GitHub references API](https://docs.github.com/en/rest/git/refs) and the
 [native protocol](../docs/protocol-v0.md).
 
-To consume the issue with the existing CLI in a local clone:
+To consume an issue with the existing CLI in a local clone:
 
 ```sh
 hn sync origin
@@ -79,8 +78,8 @@ admission; a successful remote write is not a policy admission or role grant.
 
 ## Boundaries and recovery
 
-This is a creation-only interoperability experiment, not the complete CLI port.
-It does not list/edit issues, reuse identities, manage keys, evaluate policy,
+This is a minimal browsing and creation interoperability experiment, not the complete CLI port.
+It does not edit issues, reuse identities, manage keys, evaluate policy,
 or replicate/validate remote histories. Each issue is a distinct actor; the
 public author name is descriptive, not a verified GitHub identity. Later edits
 can be signed by another authorized actor through the CLI. Prefer a test fork.
@@ -122,3 +121,53 @@ The bundle uses `docs/index.html`, `docs/LICENSES.txt`, and `docs/browser-assets
 Existing Markdown documentation is preserved; the workflow replaces only the
 generated `docs/browser-assets/` directory. The uploaded artifact includes only
 the browser bundle files.
+
+## Browse existing objects
+
+The repository and token controls apply to both **Existing issues** and
+**New signed** tabs for the selected object type. Public repositories can be browsed without a token;
+private repositories require Contents read access. Choose the Existing tab to
+load, or use Load issues to refresh. Drafts survive switching tabs.
+
+The browser walks `refs/hn/actors/*` histories and verifies exact-byte signatures,
+actor fingerprints, sequence/predecessor links and linear Git ancestry before
+displaying issue openings. It shows original titles/descriptions, authors, dates
+and full event IDs as plain text. Revisions, comments, current open/closed status,
+accepted remote-ref namespaces and policy admission are outside this reader.
+A valid signature identifies the signing key; it grants no repository authority.
+
+To bound API traffic, this PoC supports at most 100 actor refs and 300 events per
+load. Exceeding those bounds or encountering invalid/unavailable history shows an
+error instead of a partial catalog. GitHub rate-limit errors are also displayed.
+Changing repositories or tokens clears results and discards stale responses.
+
+## Object type selector
+
+The dropdown scopes both tabs to one of six supported native `hn/0` types:
+
+| Type | Creation fields and behavior |
+| --- | --- |
+| Issue | Title and optional body. |
+| Project | Title and body; starts unarchived with no custom fields/views. |
+| Project item | Draft title/body, existing project opening ID and the same ID as schema revision. |
+| Discussion | Title, body and category; starts open. |
+| Discussion reply | Existing discussion opening ID and nonempty body. |
+| Workflow | Name, title and description; starts disabled, without an executable pipeline. |
+
+The reader filters verified actor histories by the selected opening kind. Typed
+resource state is encoded in `Event.body` as required by the native protocol,
+with `intent: open`; it is not an issue with a different label. Drafts are kept
+separately in memory for each type. Type selection is locked while a signed
+publication is pending so retries retain their original object.
+
+Before publishing a child, the browser checks that its parent opening is in the
+selected repository's verified histories. Project items currently use only the
+project's opening schema and create draft targets with no custom values. Replies
+are top-level in their discussion. Full dependency closure, moderation and policy
+admission remain the CLI reader's responsibility. Browsing still shows openings,
+not projected current state. The same 100-actor/300-event limits apply.
+
+Proposals, reviews, CI, governance facts, identity relationships, memory, audits
+and custom artifacts are shown as disabled CLI-only entries. They require
+additional relationship-aware operations or separate protocol support and are
+not authored by this PoC.

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "sha256:c734a20b01f43e77bf7c22ca645baee96a2983f07e6f87c4601b7ce1f1855ab8",
+    "actor": "074a1810461ed7011f1943cff98b32fba5b11540006b07bd558b4a4f25a5435d",
+    "payload": "{\"protocol\":\"hn/0\",\"kind\":\"issue.open\",\"actor\":\"074a1810461ed7011f1943cff98b32fba5b11540006b07bd558b4a4f25a5435d\",\"actorName\":\"Browser fixture\",\"publicKey\":\"gWOezFvJEy5+T0aBouPZH6UYlC/xkasJUovLlcVRwhs\",\"sequence\":1,\"timestamp\":\"2026-11-03T21:30:45.013Z\",\"title\":\"Object title\",\"body\":\"Object body\"}",
+    "signature": "oTg6kClcQw38HcEi7GObA3Z9Q6ZeU3kgm0dyJj3Yp4YrL732YjNbhCnFzXGiyFxxfkNKx9aw30gNsw4yaIwmDQ"
+  },
+  {
+    "id": "sha256:4aef01c7bafd48533928d197645ccea581a921892cb7d6f664d2898477c7d948",
+    "actor": "56a4767bb5f652d6feacc2d4a06c87d717054bf090d4634cb15227f260541f34",
+    "payload": "{\"protocol\":\"hn/0\",\"kind\":\"project.open\",\"actor\":\"56a4767bb5f652d6feacc2d4a06c87d717054bf090d4634cb15227f260541f34\",\"actorName\":\"Browser fixture\",\"publicKey\":\"uHdNBrIPJ9sUGGUL1PItMsaIB8xWgPRuAbZtrVKfbrY\",\"sequence\":1,\"timestamp\":\"2026-11-03T21:30:45.017Z\",\"body\":\"{\\\"schema\\\":\\\"hn.project/1\\\",\\\"title\\\":\\\"Object title\\\",\\\"body\\\":\\\"Object body\\\",\\\"archived\\\":false}\",\"intent\":\"open\"}",
+    "signature": "JnwjulHWtNGj5I9ZKRx4EYlvYK4gqJ+QX0CFIZnsrXnimgEmTFr1N+LMcyhYKm7r4nI3EOdwL4IsOSo4ZftNCQ"
+  },
+  {
+    "id": "sha256:033021c298f15b034c937eb36453aaf9eacc32438c7477efa6bb343f3c7983c5",
+    "actor": "58ad9037adfb66b60b6060c57cc7ec1dbd4d47b24d2e3cc5f985c35bafb18402",
+    "payload": "{\"protocol\":\"hn/0\",\"kind\":\"project-item.open\",\"actor\":\"58ad9037adfb66b60b6060c57cc7ec1dbd4d47b24d2e3cc5f985c35bafb18402\",\"actorName\":\"Browser fixture\",\"publicKey\":\"ie339RJRTfxRM0ylzkIO2vhQdpynN0Y5rphc0RmSXXc\",\"sequence\":1,\"timestamp\":\"2026-11-03T21:30:45.020Z\",\"body\":\"{\\\"schema\\\":\\\"hn.project-item/1\\\",\\\"project_id\\\":\\\"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\\\",\\\"project_revision\\\":\\\"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\\\",\\\"target\\\":{\\\"kind\\\":\\\"draft\\\",\\\"title\\\":\\\"Object title\\\",\\\"body\\\":\\\"Object body\\\"},\\\"archived\\\":false,\\\"position\\\":\\\"0\\\"}\",\"intent\":\"open\"}",
+    "signature": "8Od/tUiRLZT3EMtNHoUS9O4GkrYsQPkPuBgCNi6TuRsDVantxWL5axz4sRskEu8zbrZ3np7Gv7fhPepu3NTODQ"
+  },
+  {
+    "id": "sha256:807eb7581ae74da2da559fabe6d80ad52199a8e83fc8fadcf2fd1ec9963f2125",
+    "actor": "1e16fddfca0e16f232b5e4fcb9defc891da945cc0b557d02827ee05d4f5d8902",
+    "payload": "{\"protocol\":\"hn/0\",\"kind\":\"discussion.open\",\"actor\":\"1e16fddfca0e16f232b5e4fcb9defc891da945cc0b557d02827ee05d4f5d8902\",\"actorName\":\"Browser fixture\",\"publicKey\":\"DojZs1BIIdneypNcRQfVZj/PrtPH0EeQ7Dgv1qRgZb8\",\"sequence\":1,\"timestamp\":\"2026-11-03T21:30:45.022Z\",\"body\":\"{\\\"schema\\\":\\\"hn.discussion/1\\\",\\\"title\\\":\\\"Object title\\\",\\\"body\\\":\\\"Object body\\\",\\\"category\\\":\\\"general\\\",\\\"status\\\":\\\"open\\\"}\",\"intent\":\"open\"}",
+    "signature": "yxO1rQifHgqor9p1RnArg9G0UmMPnCkYFo2DQUQRrV9UTB/7ydOMRL2XCVMGZZBHEHDLY8om/UIbXmy/cE24Dg"
+  },
+  {
+    "id": "sha256:2e55da07f70c4f1c3b65701c1c3bbed559e3e1a6a127219311b35928e7a36b91",
+    "actor": "7da611ff830a8ec4bd55f1a6e09c2a46ef36c3cc348960b76c61906ad2541eec",
+    "payload": "{\"protocol\":\"hn/0\",\"kind\":\"discussion-reply.open\",\"actor\":\"7da611ff830a8ec4bd55f1a6e09c2a46ef36c3cc348960b76c61906ad2541eec\",\"actorName\":\"Browser fixture\",\"publicKey\":\"bnNl6XvjY+dxk6U1yc1td6Z/YC9OzGjR/jVqNlvQLEs\",\"sequence\":1,\"timestamp\":\"2026-11-03T21:30:45.023Z\",\"body\":\"{\\\"schema\\\":\\\"hn.discussion-reply/1\\\",\\\"discussion_id\\\":\\\"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\\\",\\\"body\\\":\\\"Object body\\\"}\",\"intent\":\"open\"}",
+    "signature": "Xu+sUbEIiztmQWcYfq/f5km5/kYM9q2BZgb4xyc2S1xT+PNqd6ucToozoISZ4joLuYFKLwXs5K9EaT1EN5ZkDA"
+  },
+  {
+    "id": "sha256:805079b918914f8417053b8d47482732fd408e4c98acc3fafff6bcac97a16ffb",
+    "actor": "18b8363dcdb47260f8ba94ea46d70ddcb2bee5bd3d9a1a1b21a9974f44872e70",
+    "payload": "{\"protocol\":\"hn/0\",\"kind\":\"workflow.open\",\"actor\":\"18b8363dcdb47260f8ba94ea46d70ddcb2bee5bd3d9a1a1b21a9974f44872e70\",\"actorName\":\"Browser fixture\",\"publicKey\":\"tA6+jTPbhg32Z82ifJ7lc/LYsrqkqxNC9sq4ut+DmWI\",\"sequence\":1,\"timestamp\":\"2026-11-03T21:30:45.025Z\",\"body\":\"{\\\"schema\\\":\\\"hn.workflow/1\\\",\\\"name\\\":\\\"check\\\",\\\"title\\\":\\\"Object title\\\",\\\"description\\\":\\\"Object body\\\",\\\"enabled\\\":false}\",\"intent\":\"open\"}",
+    "signature": "3U8ktebpG7xF9sYjiI8mY60iXUOTgt8vIVO55+5+bco28Bt1LT6y8nJFjnzbTkPq2BStKuMFVfXlJXZT3b9oCQ"
+  }
+]
