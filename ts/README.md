@@ -174,7 +174,7 @@ not authored by this PoC.
 
 ## Emulated hn console
 
-The console below the tabs uses the repository and token controls above, plus
+The console is collapsed by default; click its heading to open it. It uses the repository and token controls above, plus
 its own author-name field. It provides these commands for each selectable type:
 
 ```sh
@@ -210,3 +210,8 @@ the original repository to remain selected. Further creation is blocked until
 that retry succeeds. Keep the page open and save the displayed event/ref/commit
 receipt for recovery. Form and console writes are serialized. The console's
 object type comes from the command, independently of the dropdown selection.
+
+The workspace fits the browser viewport. Desktop uses a connection sidebar and
+object panel; mobile stacks them compactly. Long results and short viewports
+scroll inside their panels rather than scrolling the whole page. The expanded
+CLI overlays the workspace and closes by clicking its heading again.

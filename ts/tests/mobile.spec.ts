@@ -201,6 +201,7 @@ test('CLI console runs hn commands against selected repo with mobile history and
     await route.fulfill({ json: data });
   });
   await page.goto('/');
+  await page.locator('.console summary').tap();
   const command = page.locator('#cli-input');
   const output = page.locator('#cli-output');
   await command.fill('hn help');
@@ -236,4 +237,19 @@ test('CLI console runs hn commands against selected repo with mobile history and
   await expect(output).toContainText('Commands must start with hn');
   await page.locator('#cli-clear').tap();
   await expect(output).toBeEmpty();
+});
+
+test('workspace fits the viewport and console opens only on click', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('.console details')).not.toHaveAttribute('open', '');
+  await expect(page.locator('#cli-input')).toBeHidden();
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 1280, height: 720 }, { width: 390, height: 844 }, { width: 320, height: 568 }]) {
+    await page.setViewportSize(viewport);
+    expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight && document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await expect(page.locator('.console summary')).toBeInViewport();
+    await page.locator('.console summary').tap();
+    await expect(page.locator('#cli-input')).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight)).toBe(true);
+    await page.locator('.console summary').tap();
+  }
 });

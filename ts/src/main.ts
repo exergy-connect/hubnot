@@ -6,8 +6,8 @@ import { GitHub } from './github';
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <header><a href="./" class="brand">h<span>n</span> / hubnot</a><span class="badge">BROWSER LAB · 01</span></header>
-  <main><div class="intro"><p class="eyebrow">COLLABORATION, CARRIED BY GIT</p><h1>Your objects.<br>Your signature.</h1><p>Browse native Hubnot objects or create a signed object in a GitHub repository. Signed here in your browser. Stored in Git.</p></div>
-  <section aria-label="Hubnot issues"><form id="issue-form">
+  <main><div class="intro"><h1>Repository workspace</h1><p>Signed collaboration, stored in Git.</p></div>
+  <section class="workspace" aria-label="Hubnot issues"><aside class="connection"><form id="issue-form">
     <fieldset id="fields"><legend>01 / Choose a repository</legend>
     <label for="repo">GitHub repository</label><div class="row"><input id="repo" name="repo" value="exergy-connect/hubnot" required spellcheck="false" autocapitalize="none" autocorrect="off"><button id="inspect" type="button" class="secondary">Check repo</button></div>
     <label for="token">GitHub access token</label><input id="token" name="token" type="password" autocomplete="off" spellcheck="false" autocapitalize="none" autocorrect="off" placeholder="Optional for public browsing · required to publish">
@@ -18,7 +18,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     <label for="object-type">Hubnot object type</label>
     <select id="object-type">${Object.entries(objectTypes).map(([id, info]) => `<option value="${id}">${info.singular[0].toUpperCase() + info.singular.slice(1)}</option>`).join('')}
     <optgroup label="CLI-only in this PoC"><option disabled>Proposals and reviews</option><option disabled>CI requests and results</option><option disabled>Decisions and merge facts</option><option disabled>Identity relationships</option><option disabled>Memory records</option><option disabled>Audit facts</option><option disabled>Custom artifacts</option></optgroup></select>
-    <div class="tabs" role="tablist" aria-label="Issues">
+    </aside><div class="object-workspace"><div class="tabs" role="tablist" aria-label="Issues">
       <button id="existing-tab" type="button" role="tab" aria-selected="false" aria-controls="existing-panel" tabindex="-1">Existing issues</button>
       <button id="new-tab" type="button" role="tab" aria-selected="true" aria-controls="new-panel">New signed issue</button>
     </div>
@@ -31,16 +31,16 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     <fieldset id="new-fields"><legend id="write-legend">02 / Write an issue</legend>
     <label for="name">Author name</label><input id="name" name="name" placeholder="Your name" maxlength="200" form="new-issue-form" required>
     <div id="title-field"><label for="title">Title</label><input id="title" name="title" placeholder="What needs to happen?" form="new-issue-form" required></div>
-    <label for="body">Description <span class="optional">optional · Markdown text</span></label><textarea id="body" name="body" rows="6" placeholder="Context, expected behavior, and next steps…"></textarea>
+    <label for="body">Description <span class="optional">optional · Markdown text</span></label><textarea id="body" name="body" rows="3" placeholder="Context, expected behavior, and next steps…"></textarea>
     <div id="category-field" hidden><label for="category">Discussion category</label><input id="category" value="general"></div>
     <div id="parent-field" hidden><label id="parent-label" for="parent-id">Parent opening ID</label><input id="parent-id" placeholder="sha256:…" autocapitalize="none" spellcheck="false"></div>
     <div id="revision-field" hidden><label for="project-revision">Project revision ID (use the opening ID)</label><input id="project-revision" placeholder="sha256:…" autocapitalize="none" spellcheck="false"></div>
     <div id="workflow-field" hidden><label for="workflow-name">Workflow name</label><input id="workflow-name" placeholder="check"><p class="hint">Creates a disabled workflow definition. It does not run code.</p></div>
     <p class="hint">This minimal PoC creates a fresh, temporary Ed25519 actor per object. The key is discarded after signing; identity reuse and issue editing are outside this demo.</p>
     </fieldset><button id="submit" type="submit">Sign & publish issue <span aria-hidden="true">↗</span></button>
-  </form><p id="status" role="status" aria-live="polite"></p><div id="result" hidden><label for="receipt">Publication receipt</label><textarea id="receipt" readonly rows="7"></textarea><button id="retry" class="secondary" type="button" hidden>Retry this exact publication</button><button id="another" class="secondary" type="button" hidden>Write another issue</button></div></div></section>
+  </form><p id="status" role="status" aria-live="polite"></p><div id="result" hidden><label for="receipt">Publication receipt</label><textarea id="receipt" readonly rows="3"></textarea><button id="retry" class="secondary" type="button" hidden>Retry this exact publication</button><button id="another" class="secondary" type="button" hidden>Write another issue</button></div></div></div></section>
   <section class="console" aria-label="Hubnot CLI console">
-    <details open><summary>Hubnot CLI console</summary>
+    <details><summary>Hubnot CLI console <span class="console-toggle">click to open</span></summary>
     <p class="hint">Uses the selected repository and token. Browser emulation of supported hn commands; type hn help for the command list. Output and history stay in memory.</p>
     <label for="cli-author">Console author name (for signed creations)</label><input id="cli-author" value="Browser user" maxlength="200">
     <pre id="cli-output" role="log" aria-live="polite" aria-label="Console output">Type hn help to get started.</pre>
